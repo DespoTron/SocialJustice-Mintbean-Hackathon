@@ -1,4 +1,4 @@
-var config = {
+const config = {
   type: Phaser.AUTO,
   width: 800,
   height: 600,
@@ -16,16 +16,16 @@ var config = {
   },
 };
 
-var player;
-var stars;
-var bombs;
-var platforms;
-var cursors;
-var score = 0;
-var gameOver = false;
-var scoreText;
+let player;
+let stars;
+let bombs;
+let platforms;
+let cursors;
+let score = 0;
+let gameOver = false;
+let scoreText;
 
-var game = new Phaser.Game(config);
+const game = new Phaser.Game(config);
 
 function preload() {
   this.load.image('sky', 'assets/sky.png');
@@ -44,11 +44,28 @@ function preload() {
   });
 }
 
+function typewriteText(text) {
+  const length = text.length;
+  let i = 0;
+  this.time.addEvent({
+    callback: () => {
+      this.label.text += text[i];
+      ++i;
+    },
+    repeat: length - 1,
+    delay: 200,
+  });
+}
+
 function create() {
   //  A simple background for our game
   this.add.image(400, 300, 'sky');
   this.add.image(400, 300, 'grass');
 
+  // creating question text input
+  this.label = this.add.text(100, 100, '');
+
+  this.typewriteText('Hello world');
   //  The platforms group contains the ground and the 2 ledges we can jump on
   platforms = this.physics.add.staticGroup();
 
@@ -206,9 +223,9 @@ function collectCarrot(player, carrot) {
       child.enableBody(true, child.x, 0, true, true);
     });
 
-    var x = player.x < 400 ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+    const x = player.x < 400 ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
-    var tree = trees.create(x, 16, 'tree');
+    const tree = trees.create(x, 16, 'tree');
     tree.setBounce(1);
     tree.setCollideWorldBounds(true);
     tree.setVelocity(Phaser.Math.Between(-200, 200), 20);
@@ -229,9 +246,9 @@ function collectHamburger(player, hamburger) {
       child.enableBody(true, child.x, 0, true, true);
     });
 
-    var x = player.x < 400 ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+    const x = player.x < 400 ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
-    var bomb = bombs.create(x, 16, 'bomb');
+    const bomb = bombs.create(x, 16, 'bomb');
     bomb.setBounce(1);
     bomb.setCollideWorldBounds(true);
     bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
