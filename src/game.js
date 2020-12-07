@@ -1,12 +1,12 @@
-var config = {
+const config = {
   type: Phaser.AUTO,
   width: 800,
   height: 600,
   physics: {
     default: 'arcade',
     arcade: {
-      gravity: { y: 300 },
-      debug: false,
+      gravity: { y: 200 },
+      // debug: false,
     },
   },
   scene: {
@@ -38,17 +38,16 @@ function preload() {
   this.load.image('tree', 'assets/tree.png')
   // this.load.image("bike", "assets/bike.png");
   this.load.image('bomb', 'assets/bomb.png')
-  this.load.image('bg1', 'assets/nat1.png')
   this.load.image('bg2', 'assets/nat2.png')
-  this.load.spritesheet('dude', 'assets/sprite_pink.png', {
-    frameWidth: 16,
-    frameHeight: 16,
+  this.load.spritesheet('dud', 'assets/sprite_pink.png', {
+    frameWidth: 32,
+    frameHeight: 32,
   })
 }
 
 function create() {
   //  A simple background for our game
-  bg1 = this.add.image(0, 0, 'bg1')
+  this.add.image(300, 400, 'sky')
   // bg2 = this.add.image(100, 100, 'bg2')
 
   // //  The platforms group contains the ground and the 2 ledges we can jump on
@@ -56,7 +55,7 @@ function create() {
 
   // //  Here we create the ground.
   // //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-  // platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+  // platforms.create(400, 568, 'ground').setScale(2).refreshBody()
 
   // //  Now let's create some ledges
   // platforms.create(600, 400, 'ground');
@@ -64,43 +63,44 @@ function create() {
   // platforms.create(750, 220, 'ground');
 
   // The player and its settings
-  this.player = this.physics.add.sprite(48, 528, 'dude').setScale(2)
-  // this.cursors = this.input.keyboard.createCursorKeys()
-  this.physics.add.collider(this.player, collision)
-  this.player.setCollideWorldBounds(true)
+  player = this.physics.add.sprite(48, 528, 'dud').setScale(2)
+  // cursors = game.input.keyboard.createCursorKeys()
+  this.physics.add.collider(player, 'bg2')
+  player.setCollideWorldBounds(true)
+  player.body.collideWorldBounds = true
 
   this.anims.create({
     key: 'left',
-    frames: this.anims.generateFrameNumbers('dude', {
-      start: this.spriteView.left[0],
-      end: this.spriteView.left[1],
+    frames: this.anims.generateFrameNumbers('dud', {
+      start: 3,
+      end: 5,
     }),
     frameRate: 5,
     repeat: -1,
   })
   this.anims.create({
     key: 'right',
-    frames: this.anims.generateFrameNumbers('dude', {
-      start: this.spriteView.right[0],
-      end: this.spriteView.right[1],
+    frames: this.anims.generateFrameNumbers('dud', {
+      start: 6,
+      end: 8,
     }),
     frameRate: 5,
     repeat: -1,
   })
   this.anims.create({
     key: 'up',
-    frames: this.anims.generateFrameNumbers('dude', {
-      start: this.spriteView.up[0],
-      end: this.spriteView.up[1],
+    frames: this.anims.generateFrameNumbers('dud', {
+      start: 9,
+      end: 11,
     }),
     frameRate: 5,
     repeat: -1,
   })
   this.anims.create({
     key: 'down',
-    frames: this.anims.generateFrameNumbers('dude', {
-      start: this.spriteView.down[0],
-      end: this.spriteView.down[1],
+    frames: this.anims.generateFrameNumbers('dud', {
+      start: 0,
+      end: 2,
     }),
     frameRate: 5,
     repeat: -1,
@@ -176,38 +176,21 @@ function update() {
     return
   }
 
-  if (this.cursors.right.isDown) {
-    this.player.anims.play('right', true)
-    this.player.body.setVelocity(300)
-  } else if (this.cursors.left.isDown) {
-    this.player.anims.play('left', true)
-    this.player.body.setVelocity(-300)
-  } else if (this.cursors.down.isDown) {
-    this.player.anims.play('down', true)
-    this.player.body.setVelocity(300)
-  } else if (this.cursors.up.isDown) {
-    this.player.anims.play('up', true)
-    this.player.body.setVelocity(-300)
+  if (cursors.right.isDown) {
+    player.anims.play('right', true)
+    player.setVelocity(300)
+  } else if (cursors.left.isDown) {
+    player.anims.play('left', true)
+    player.setVelocity(-300)
+  } else if (cursors.down.isDown) {
+    player.anims.play('down', true)
+    player.setVelocity(300)
+  } else if (cursors.up.isDown) {
+    player.anims.play('up', true)
+    player.setVelocity(-300)
   } else {
-    this.player.body.setVelocity(0)
+    player.body.setVelocity(0)
   }
-  //if (cursothis.plrs.left.isDown) {
-  //player.setVelocityX(-160)
-
-  //player.anims.play('left', true)
-  //} else if (cursors.right.isDown) {
-  //player.setVelocityX(160)
-
-  //player.anims.play('right', true)
-  //} else {
-  //player.setVelocityX(0)
-
-  //player.anims.play('turn')
-  //}
-
-  //if (cursors.up.isDown && player.body.touching.down) {
-  //player.setVelocityY(-330)
-  //}
 }
 
 function collectStar(player, star) {
