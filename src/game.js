@@ -47,27 +47,27 @@ function preload() {
 
 function create() {
   //  A simple background for our game
-  this.add.image(300, 400, 'sky')
+  this.add.image(400, 300, 'sky')
   // bg2 = this.add.image(100, 100, 'bg2')
 
   // //  The platforms group contains the ground and the 2 ledges we can jump on
-  platforms = this.physics.add.staticGroup()
+  // platforms = this.physics.add.staticGroup()
 
   // //  Here we create the ground.
   // //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-  // platforms.create(400, 568, 'ground').setScale(2).refreshBody()
+  // platforms.create(0, 568, 'sky').setScale(1).refreshBody()
 
   // //  Now let's create some ledges
-  // platforms.create(600, 400, 'ground');
+  // platforms.create(600, 400, 'ground')
   // platforms.create(50, 250, 'ground');
   // platforms.create(750, 220, 'ground');
 
   // The player and its settings
-  player = this.physics.add.sprite(48, 528, 'dud').setScale(2)
+  player = this.physics.add.sprite(0, 600, 'dud').setScale(1)
   // cursors = game.input.keyboard.createCursorKeys()
-  this.physics.add.collider(player, 'bg2')
+  this.physics.add.collider(player, 'sky')
+  // player.body.collideWorldBounds = true
   player.setCollideWorldBounds(true)
-  player.body.collideWorldBounds = true
 
   this.anims.create({
     key: 'left',
@@ -154,11 +154,11 @@ function create() {
 
   //  Collide the player and the stars with the platforms
   this.physics.add.collider(player, platforms)
-  this.physics.add.collider(stars, platforms)
-  this.physics.add.collider(carrots, platforms)
-  this.physics.add.collider(hamburgers, platforms)
-  this.physics.add.collider(bombs, platforms)
-  this.physics.add.collider(trees, platforms)
+  this.physics.add.collider(stars, 'sky')
+  this.physics.add.collider(carrots, 'sky')
+  this.physics.add.collider(hamburgers, 'sky')
+  this.physics.add.collider(bombs, 'sky')
+  this.physics.add.collider(trees, 'sky')
 
   //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
   this.physics.add.overlap(player, stars, collectStar, null, this)
@@ -172,25 +172,30 @@ function create() {
 }
 
 function update() {
+  player.body.setVelocity(0)
+
   if (gameOver) {
     return
   }
 
-  if (cursors.right.isDown) {
-    player.anims.play('right', true)
-    player.setVelocity(300)
-  } else if (cursors.left.isDown) {
+  if (cursors.left.isDown) {
     player.anims.play('left', true)
-    player.setVelocity(-300)
-  } else if (cursors.down.isDown) {
+    player.body.setVelocity(-300)
+  } else if (cursors.right.isDown) {
+    player.anims.play('right', true)
+    player.body.setVelocity(300)
+  }
+
+  if (cursors.down.isDown) {
     player.anims.play('down', true)
-    player.setVelocity(300)
+    player.body.setVelocity(300)
   } else if (cursors.up.isDown) {
     player.anims.play('up', true)
-    player.setVelocity(-300)
-  } else {
-    player.body.setVelocity(0)
+    player.body.setVelocity(-300)
   }
+  // } else {
+  //   player.body.setVelocity(0)
+  // }
 }
 
 function collectStar(player, star) {
