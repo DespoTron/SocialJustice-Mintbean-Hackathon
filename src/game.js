@@ -193,9 +193,6 @@ function update() {
     player.anims.play('up', true)
     player.body.setVelocity(-300)
   }
-  // } else {
-  //   player.body.setVelocity(0)
-  // }
 }
 
 function collectStar(player, star) {
