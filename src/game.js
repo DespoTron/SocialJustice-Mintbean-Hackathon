@@ -3,7 +3,7 @@ var config = {
   width: 800,
   height: 600,
   physics: {
-    default: 'arcade',
+    default: "arcade",
     arcade: {
       gravity: { y: 300 },
       debug: false,
@@ -28,17 +28,22 @@ var scoreText;
 var game = new Phaser.Game(config);
 
 function preload() {
-  this.load.image('sky', 'assets/sky.png');
-  this.load.image('grass', 'assets/land-clipart-5.png');
-  this.load.image('ground', 'assets/platform.png');
-  this.load.image('star', 'assets/star.png');
-  this.load.image('carrot', 'assets/carrot.png');
+  // this.load.image("map", "assets/game_map.json");
+  this.load.tilemapTiledJSON("world", "assets/game_map.json");
+  this.load.image("tf_jungle_tileset", "/assets/tf_jungle_tileset.png");
+  this.load.image("beach_tileset", "/assets/beach_tileset.png");
+
+  this.load.image("sky", "assets/sky.png");
+  this.load.image("grass", "assets/land-clipart-5.png");
+  this.load.image("ground", "assets/platform.png");
+  this.load.image("star", "assets/star.png");
+  this.load.image("carrot", "assets/carrot.png");
   // this.load.image("chicken", "assets/chicken.png");
-  this.load.image('hamburger', 'assets/hamburger.png');
-  this.load.image('tree', 'assets/tree.png');
+  this.load.image("hamburger", "assets/hamburger.png");
+  this.load.image("tree", "assets/tree.png");
   // this.load.image("bike", "assets/bike.png");
-  this.load.image('bomb', 'assets/bomb.png');
-  this.load.spritesheet('dude', 'assets/dude.png', {
+  this.load.image("bomb", "assets/bomb.png");
+  this.load.spritesheet("dude", "assets/dude.png", {
     frameWidth: 32,
     frameHeight: 48,
   });
@@ -46,23 +51,30 @@ function preload() {
 
 function create() {
   //  A simple background for our game
-  this.add.image(400, 300, 'sky');
-  this.add.image(400, 300, 'grass');
+  // this.add.image(400, 300, "sky");
+  // this.add.image(400, 300, "grass");
+  // this.add.image(400, 300, "map");
+  const map = this.add.tilemap("world");
+  const tileset1 = map.addTilesetImage(
+    "tf_jungle_tileset",
+    "tf_jungle_tileset"
+  );
+  const tileset2 = map.addTilesetImage("beach_tileset", "beach_tileset");
 
   //  The platforms group contains the ground and the 2 ledges we can jump on
   platforms = this.physics.add.staticGroup();
 
   //  Here we create the ground.
   //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-  platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+  platforms.create(400, 568, "ground").setScale(2).refreshBody();
 
   //  Now let's create some ledges
-  platforms.create(600, 400, 'ground');
-  platforms.create(50, 250, 'ground');
-  platforms.create(750, 220, 'ground');
+  platforms.create(600, 400, "ground");
+  platforms.create(50, 250, "ground");
+  platforms.create(750, 220, "ground");
 
   // The player and its settings
-  player = this.physics.add.sprite(100, 450, 'dude');
+  player = this.physics.add.sprite(100, 450, "dude");
 
   //  Player physics properties. Give the little guy a slight bounce.
   player.setBounce(0.2);
@@ -70,21 +82,21 @@ function create() {
 
   //  Our player animations, turning, walking left and walking right.
   this.anims.create({
-    key: 'left',
-    frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
+    key: "left",
+    frames: this.anims.generateFrameNumbers("dude", { start: 0, end: 3 }),
     frameRate: 10,
     repeat: -1,
   });
 
   this.anims.create({
-    key: 'turn',
-    frames: [{ key: 'dude', frame: 4 }],
+    key: "turn",
+    frames: [{ key: "dude", frame: 4 }],
     frameRate: 20,
   });
 
   this.anims.create({
-    key: 'right',
-    frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
+    key: "right",
+    frames: this.anims.generateFrameNumbers("dude", { start: 5, end: 8 }),
     frameRate: 10,
     repeat: -1,
   });
@@ -94,7 +106,7 @@ function create() {
 
   //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
   stars = this.physics.add.group({
-    key: 'star',
+    key: "star",
     repeat: 4,
     setXY: { x: 12, y: 0, stepX: 70 },
   });
@@ -105,7 +117,7 @@ function create() {
   });
 
   carrots = this.physics.add.group({
-    key: 'carrot',
+    key: "carrot",
     repeat: 5,
     setXY: { x: 0, y: 0, stepX: 120 },
   });
@@ -116,7 +128,7 @@ function create() {
   });
 
   hamburgers = this.physics.add.group({
-    key: 'hamburger',
+    key: "hamburger",
     repeat: 3,
     setXY: { x: 40, y: 0, stepX: 210 },
   });
@@ -130,9 +142,9 @@ function create() {
   bombs = this.physics.add.group();
 
   //  The score
-  scoreText = this.add.text(16, 16, 'score: 0', {
-    fontSize: '32px',
-    fill: '#000',
+  scoreText = this.add.text(16, 16, "score: 0", {
+    fontSize: "32px",
+    fill: "#000",
   });
 
   //  Collide the player and the stars with the platforms
@@ -162,15 +174,15 @@ function update() {
   if (cursors.left.isDown) {
     player.setVelocityX(-160);
 
-    player.anims.play('left', true);
+    player.anims.play("left", true);
   } else if (cursors.right.isDown) {
     player.setVelocityX(160);
 
-    player.anims.play('right', true);
+    player.anims.play("right", true);
   } else {
     player.setVelocityX(0);
 
-    player.anims.play('turn');
+    player.anims.play("turn");
   }
 
   if (cursors.up.isDown && player.body.touching.down) {
@@ -183,7 +195,7 @@ function collectStar(player, star) {
 
   //  Add and update the score
   score -= 5;
-  scoreText.setText('Score: ' + score);
+  scoreText.setText("Score: " + score);
 
   if (stars.countActive(true) === 0) {
     //  A new batch of stars to collect
@@ -198,7 +210,7 @@ function collectCarrot(player, carrot) {
 
   //  Add and update the score
   score -= 10;
-  scoreText.setText('Score: ' + score);
+  scoreText.setText("Score: " + score);
 
   if (carrots.countActive(true) === 0) {
     //  A new batch of stars to collect
@@ -206,9 +218,12 @@ function collectCarrot(player, carrot) {
       child.enableBody(true, child.x, 0, true, true);
     });
 
-    var x = player.x < 400 ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+    var x =
+      player.x < 400
+        ? Phaser.Math.Between(400, 800)
+        : Phaser.Math.Between(0, 400);
 
-    var tree = trees.create(x, 16, 'tree');
+    var tree = trees.create(x, 16, "tree");
     tree.setBounce(1);
     tree.setCollideWorldBounds(true);
     tree.setVelocity(Phaser.Math.Between(-200, 200), 20);
@@ -221,7 +236,7 @@ function collectHamburger(player, hamburger) {
 
   //  Add and update the score
   score += 25;
-  scoreText.setText('Score: ' + score);
+  scoreText.setText("Score: " + score);
 
   if (hamburgers.countActive(true) === 0) {
     //  A new batch of stars to collect
@@ -229,9 +244,12 @@ function collectHamburger(player, hamburger) {
       child.enableBody(true, child.x, 0, true, true);
     });
 
-    var x = player.x < 400 ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+    var x =
+      player.x < 400
+        ? Phaser.Math.Between(400, 800)
+        : Phaser.Math.Between(0, 400);
 
-    var bomb = bombs.create(x, 16, 'bomb');
+    var bomb = bombs.create(x, 16, "bomb");
     bomb.setBounce(1);
     bomb.setCollideWorldBounds(true);
     bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
@@ -254,7 +272,7 @@ function hitBomb(player, bomb) {
 
   player.setTint(0xff0000);
 
-  player.anims.play('turn');
+  player.anims.play("turn");
 
   gameOver = true;
 }
