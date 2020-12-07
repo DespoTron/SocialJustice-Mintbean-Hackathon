@@ -14,233 +14,271 @@ var config = {
     create: create,
     update: update,
   },
-};
+}
 
-var player;
-var stars;
-var bombs;
-var platforms;
-var cursors;
-var score = 0;
-var gameOver = false;
-var scoreText;
+var player
+var stars
+var bombs
+var platforms
+var cursors
+var score = 0
+var gameOver = false
+var scoreText
 
-var game = new Phaser.Game(config);
+var game = new Phaser.Game(config)
 
 function preload() {
-  this.load.image('sky', 'assets/sky.png');
-  this.load.image('grass', 'assets/land-clipart-5.png');
-  this.load.image('ground', 'assets/platform.png');
-  this.load.image('star', 'assets/star.png');
-  this.load.image('carrot', 'assets/carrot.png');
+  this.load.image('sky', 'assets/sky.png')
+  this.load.image('grass', 'assets/land-clipart-5.png')
+  this.load.image('ground', 'assets/platform.png')
+  this.load.image('star', 'assets/star.png')
+  this.load.image('carrot', 'assets/carrot.png')
   // this.load.image("chicken", "assets/chicken.png");
-  this.load.image('hamburger', 'assets/hamburger.png');
-  this.load.image('tree', 'assets/tree.png');
+  this.load.image('hamburger', 'assets/hamburger.png')
+  this.load.image('tree', 'assets/tree.png')
   // this.load.image("bike", "assets/bike.png");
-  this.load.image('bomb', 'assets/bomb.png');
-  this.load.spritesheet('dude', 'assets/dude.png', {
-    frameWidth: 32,
-    frameHeight: 48,
-  });
+  this.load.image('bomb', 'assets/bomb.png')
+  this.load.image('bg1', 'assets/nat1.png')
+  this.load.image('bg2', 'assets/nat2.png')
+  this.load.spritesheet('dude', 'assets/sprite_pink.png', {
+    frameWidth: 16,
+    frameHeight: 16,
+  })
 }
 
 function create() {
   //  A simple background for our game
-  this.add.image(400, 300, 'sky');
-  this.add.image(400, 300, 'grass');
+  bg1 = this.add.image(0, 0, 'bg1')
+  // bg2 = this.add.image(100, 100, 'bg2')
 
-  //  The platforms group contains the ground and the 2 ledges we can jump on
-  platforms = this.physics.add.staticGroup();
+  // //  The platforms group contains the ground and the 2 ledges we can jump on
+  platforms = this.physics.add.staticGroup()
 
-  //  Here we create the ground.
-  //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-  platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+  // //  Here we create the ground.
+  // //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
+  // platforms.create(400, 568, 'ground').setScale(2).refreshBody();
 
-  //  Now let's create some ledges
-  platforms.create(600, 400, 'ground');
-  platforms.create(50, 250, 'ground');
-  platforms.create(750, 220, 'ground');
+  // //  Now let's create some ledges
+  // platforms.create(600, 400, 'ground');
+  // platforms.create(50, 250, 'ground');
+  // platforms.create(750, 220, 'ground');
 
   // The player and its settings
-  player = this.physics.add.sprite(100, 450, 'dude');
+  this.player = this.physics.add.sprite(48, 528, 'dude').setScale(2)
+  // this.cursors = this.input.keyboard.createCursorKeys()
+  this.physics.add.collider(this.player, collision)
+  this.player.setCollideWorldBounds(true)
 
-  //  Player physics properties. Give the little guy a slight bounce.
-  player.setBounce(0.2);
-  player.setCollideWorldBounds(true);
-
-  //  Our player animations, turning, walking left and walking right.
   this.anims.create({
     key: 'left',
-    frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
-    frameRate: 10,
+    frames: this.anims.generateFrameNumbers('dude', {
+      start: this.spriteView.left[0],
+      end: this.spriteView.left[1],
+    }),
+    frameRate: 5,
     repeat: -1,
-  });
-
-  this.anims.create({
-    key: 'turn',
-    frames: [{ key: 'dude', frame: 4 }],
-    frameRate: 20,
-  });
-
+  })
   this.anims.create({
     key: 'right',
-    frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
-    frameRate: 10,
+    frames: this.anims.generateFrameNumbers('dude', {
+      start: this.spriteView.right[0],
+      end: this.spriteView.right[1],
+    }),
+    frameRate: 5,
     repeat: -1,
-  });
+  })
+  this.anims.create({
+    key: 'up',
+    frames: this.anims.generateFrameNumbers('dude', {
+      start: this.spriteView.up[0],
+      end: this.spriteView.up[1],
+    }),
+    frameRate: 5,
+    repeat: -1,
+  })
+  this.anims.create({
+    key: 'down',
+    frames: this.anims.generateFrameNumbers('dude', {
+      start: this.spriteView.down[0],
+      end: this.spriteView.down[1],
+    }),
+    frameRate: 5,
+    repeat: -1,
+  })
 
   //  Input Events
-  cursors = this.input.keyboard.createCursorKeys();
+  cursors = this.input.keyboard.createCursorKeys()
 
   //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
   stars = this.physics.add.group({
     key: 'star',
     repeat: 4,
     setXY: { x: 12, y: 0, stepX: 70 },
-  });
+  })
 
   stars.children.iterate(function (child) {
     //  Give each star a slightly different bounce
-    child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-  });
+    child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8))
+  })
 
   carrots = this.physics.add.group({
     key: 'carrot',
     repeat: 5,
     setXY: { x: 0, y: 0, stepX: 120 },
-  });
+  })
 
   carrots.children.iterate(function (child) {
     //  Give each star a slightly different bounce
-    child.setBounceY(Phaser.Math.FloatBetween(0.2, 0.4));
-  });
+    child.setBounceY(Phaser.Math.FloatBetween(0.2, 0.4))
+  })
 
   hamburgers = this.physics.add.group({
     key: 'hamburger',
     repeat: 3,
     setXY: { x: 40, y: 0, stepX: 210 },
-  });
+  })
 
   hamburgers.children.iterate(function (child) {
     //  Give each star a slightly different bounce
-    child.setBounceY(Phaser.Math.FloatBetween(0.2, 0.9));
-  });
+    child.setBounceY(Phaser.Math.FloatBetween(0.2, 0.9))
+  })
 
-  trees = this.physics.add.group();
-  bombs = this.physics.add.group();
+  trees = this.physics.add.group()
+  bombs = this.physics.add.group()
 
   //  The score
   scoreText = this.add.text(16, 16, 'score: 0', {
     fontSize: '32px',
     fill: '#000',
-  });
+  })
 
   //  Collide the player and the stars with the platforms
-  this.physics.add.collider(player, platforms);
-  this.physics.add.collider(stars, platforms);
-  this.physics.add.collider(carrots, platforms);
-  this.physics.add.collider(hamburgers, platforms);
-  this.physics.add.collider(bombs, platforms);
-  this.physics.add.collider(trees, platforms);
+  this.physics.add.collider(player, platforms)
+  this.physics.add.collider(stars, platforms)
+  this.physics.add.collider(carrots, platforms)
+  this.physics.add.collider(hamburgers, platforms)
+  this.physics.add.collider(bombs, platforms)
+  this.physics.add.collider(trees, platforms)
 
   //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
-  this.physics.add.overlap(player, stars, collectStar, null, this);
+  this.physics.add.overlap(player, stars, collectStar, null, this)
 
-  this.physics.add.overlap(player, carrots, collectCarrot, null, this);
+  this.physics.add.overlap(player, carrots, collectCarrot, null, this)
 
-  this.physics.add.overlap(player, hamburgers, collectHamburger, null, this);
+  this.physics.add.overlap(player, hamburgers, collectHamburger, null, this)
 
-  this.physics.add.collider(bombs, trees, hitTree, null, this);
-  this.physics.add.collider(player, bombs, hitBomb, null, this);
+  this.physics.add.collider(bombs, trees, hitTree, null, this)
+  this.physics.add.collider(player, bombs, hitBomb, null, this)
 }
 
 function update() {
   if (gameOver) {
-    return;
+    return
   }
 
-  if (cursors.left.isDown) {
-    player.setVelocityX(-160);
-
-    player.anims.play('left', true);
-  } else if (cursors.right.isDown) {
-    player.setVelocityX(160);
-
-    player.anims.play('right', true);
+  if (this.cursors.right.isDown) {
+    this.player.anims.play('right', true)
+    this.player.body.setVelocity(300)
+  } else if (this.cursors.left.isDown) {
+    this.player.anims.play('left', true)
+    this.player.body.setVelocity(-300)
+  } else if (this.cursors.down.isDown) {
+    this.player.anims.play('down', true)
+    this.player.body.setVelocity(300)
+  } else if (this.cursors.up.isDown) {
+    this.player.anims.play('up', true)
+    this.player.body.setVelocity(-300)
   } else {
-    player.setVelocityX(0);
-
-    player.anims.play('turn');
+    this.player.body.setVelocity(0)
   }
+  //if (cursothis.plrs.left.isDown) {
+  //player.setVelocityX(-160)
 
-  if (cursors.up.isDown && player.body.touching.down) {
-    player.setVelocityY(-330);
-  }
+  //player.anims.play('left', true)
+  //} else if (cursors.right.isDown) {
+  //player.setVelocityX(160)
+
+  //player.anims.play('right', true)
+  //} else {
+  //player.setVelocityX(0)
+
+  //player.anims.play('turn')
+  //}
+
+  //if (cursors.up.isDown && player.body.touching.down) {
+  //player.setVelocityY(-330)
+  //}
 }
 
 function collectStar(player, star) {
-  star.disableBody(true, true);
+  star.disableBody(true, true)
 
   //  Add and update the score
-  score -= 5;
-  scoreText.setText('Score: ' + score);
+  score -= 5
+  scoreText.setText('Score: ' + score)
 
   if (stars.countActive(true) === 0) {
     //  A new batch of stars to collect
     stars.children.iterate(function (child) {
-      child.enableBody(true, child.x, 0, true, true);
-    });
+      child.enableBody(true, child.x, 0, true, true)
+    })
   }
 }
 
 function collectCarrot(player, carrot) {
-  carrot.disableBody(true, true);
+  carrot.disableBody(true, true)
 
   //  Add and update the score
-  score -= 10;
-  scoreText.setText('Score: ' + score);
+  score -= 10
+  scoreText.setText('Score: ' + score)
 
   if (carrots.countActive(true) === 0) {
     //  A new batch of stars to collect
     carrots.children.iterate(function (child) {
-      child.enableBody(true, child.x, 0, true, true);
-    });
+      child.enableBody(true, child.x, 0, true, true)
+    })
 
-    var x = player.x < 400 ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+    var x =
+      player.x < 400
+        ? Phaser.Math.Between(400, 800)
+        : Phaser.Math.Between(0, 400)
 
-    var tree = trees.create(x, 16, 'tree');
-    tree.setBounce(1);
-    tree.setCollideWorldBounds(true);
-    tree.setVelocity(Phaser.Math.Between(-200, 200), 20);
-    tree.allowGravity = false;
+    var tree = trees.create(x, 16, 'tree')
+    tree.setBounce(1)
+    tree.setCollideWorldBounds(true)
+    tree.setVelocity(Phaser.Math.Between(-200, 200), 20)
+    tree.allowGravity = false
   }
 }
 
 function collectHamburger(player, hamburger) {
-  hamburger.disableBody(true, true);
+  hamburger.disableBody(true, true)
 
   //  Add and update the score
-  score += 25;
-  scoreText.setText('Score: ' + score);
+  score += 25
+  scoreText.setText('Score: ' + score)
 
   if (hamburgers.countActive(true) === 0) {
     //  A new batch of stars to collect
     hamburgers.children.iterate(function (child) {
-      child.enableBody(true, child.x, 0, true, true);
-    });
+      child.enableBody(true, child.x, 0, true, true)
+    })
 
-    var x = player.x < 400 ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+    var x =
+      player.x < 400
+        ? Phaser.Math.Between(400, 800)
+        : Phaser.Math.Between(0, 400)
 
-    var bomb = bombs.create(x, 16, 'bomb');
-    bomb.setBounce(1);
-    bomb.setCollideWorldBounds(true);
-    bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
-    bomb.allowGravity = false;
+    var bomb = bombs.create(x, 16, 'bomb')
+    bomb.setBounce(1)
+    bomb.setCollideWorldBounds(true)
+    bomb.setVelocity(Phaser.Math.Between(-200, 200), 20)
+    bomb.allowGravity = false
   }
 }
 
 function hitTree(bomb, tree) {
-  bomb.destroy();
+  bomb.destroy()
 
   // player.setTint(0xff0000);
 
@@ -250,11 +288,11 @@ function hitTree(bomb, tree) {
 }
 
 function hitBomb(player, bomb) {
-  this.physics.pause();
+  this.physics.pause()
 
-  player.setTint(0xff0000);
+  player.setTint(0xff0000)
 
-  player.anims.play('turn');
+  player.anims.play('turn')
 
-  gameOver = true;
+  gameOver = true
 }
